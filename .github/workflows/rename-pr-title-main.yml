@@ -40,7 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_OWNER: anotherback
-          GITHUB_REPO: anotherback
+          GITHUB_REPO: toanotherback
           GITHUB_BRANCHE: develop
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
@@ -53,5 +53,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_OWNER: anotherback
-          GITHUB_REPO: anotherback
+          GITHUB_REPO: toanotherback
           GITHUB_PULL_NUMBER: ${{ github.event.pull_request.number }}
