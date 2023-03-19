@@ -1,45 +1,39 @@
-type aobResponse = {
-    status: "catch" | "s" | "e" | "r";
-    info?: string;
-    response: Response;
-    data: object;
-    url: string;
-};
+export type objDataResponse = {
+	i?: string;
+	d?: any; 
+}
+
+export type objRequest = {
+	path: string;
+	parameters: RequestInit;
+}
+
+export type objResponse = {
+	response?: Response;
+	data?: objDataResponse;
+	error?: Error;
+}
 
 export default class Request{
     constructor(path: string, params: RequestInit);
 
-    s(fnc: (rep: object) => void): this;
+    s(fnc: (data: objDataResponse["d"]) => void): this;
 
-    e(fnc: (rep: object) => void): this;
+    sd(): Promise<objDataResponse["d"]>;
 
-    r(fnc: (path: string) => false | void): this;
+    e(fnc: (data: objDataResponse["d"]) => void): this;
 
-    info(fnc: (rep: string) => void): this;
+    ed(): Promise<objDataResponse["d"]>;
 
-    then(fnc: (rep: aobResponse) => void): this;
+    info(fnc: (info: string, status: boolean) => void): this;
+
+	status(code: number, fnc: (data: objResponse) => void): this;
+
+	statusData(code: number): Promise<objResponse>;
+
+    then(fnc: (rep: objResponse) => void): this;
     
-    catch(fnc: (rep: aobResponse) => void): this;
+    catch(fnc: (rep: objResponse) => void): this;
 
-    static onError(fnc: (rep: aobResponse, retry: () => Promise<void>, setRep: (response: aobResponse) => void) => void): void;
-
-    static onRedirect(fnc: (path: string) => void): void;
-
-    static addHook(info: string, fnc: (rep: aobResponse, retry: () => Promise<void>, setRep: (response: aobResponse) => void) => void): void;
-
-    static removeHook(info: string, fnc: () => void): void;
-
-    static send(path: string, params: RequestInit): Request;
-
-    static get(path: string, params: RequestInit): Request;
-
-    static head(path: string, params: RequestInit): Request;
-
-    static post(path: string, body: object, params: RequestInit): Request;
-
-    static put(path: string, body: object, params: RequestInit): Request;
-
-    static options(path: string, params: RequestInit): Request;
-
-    static patch(path: string, body: object, params: RequestInit): Request;
+    result: Promise<objResponse>;
 }
