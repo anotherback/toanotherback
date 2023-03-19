@@ -63,9 +63,6 @@ jobs:
       - name: build cdn
         run: npx webpack
 
-      - name: test
-        run: ls dist
-
       - name: delete useless file
         run: |
           rm -rf .github
