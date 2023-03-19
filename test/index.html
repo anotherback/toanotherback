@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="/index.js"></script>
+</head>
+<body>
+	<script>
+		(async () => {
+			const taob = new Toanotherback({
+				prefix: "test",
+				host: "192.168.1.1:1506",
+				https: false,
+				parameters: {
+					credentials: "include"
+				},
+
+				requestInterceptor: (request) => request,
+				responseInterceptor: (response) => response,
+				hookError: (error) => console.error(error)
+			})
+
+			let result = await taob.get("")
+			.s(data => console.log(data))
+			.status(200, data => console.log(data))
+			.info((info, status) => console.log(info, status))
+			.sd();
+
+			console.log(result);
+		})()
+	</script>
+</body>
+</html>
