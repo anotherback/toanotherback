@@ -1,8 +1,3 @@
-export type objDataResponse = {
-	i?: string;
-	d?: any; 
-}
-
 export type objRequest = {
 	path: string;
 	parameters: RequestInit;
@@ -10,20 +5,20 @@ export type objRequest = {
 
 export type objResponse = {
 	response?: Response;
-	data?: objDataResponse;
+	data?: any;
 	error?: Error;
 }
 
 export default class Request{
     constructor(path: string, params: RequestInit);
 
-    s(fnc: (data: objDataResponse["d"]) => void): this;
+    s(fnc: (data: any) => void): this;
 
-    sd(): Promise<objDataResponse["d"]>;
+    sd(): Promise<any>;
 
-    e(fnc: (data: objDataResponse["d"]) => void): this;
+    e(fnc: (data: any) => void): this;
 
-    ed(): Promise<objDataResponse["d"]>;
+    ed(): Promise<any>;
 
     info(fnc: (info: string, status: boolean) => void): this;
 
