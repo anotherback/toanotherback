@@ -12,7 +12,7 @@ export default class Request{
 
 	async sd(){
 		let result = await this.result;
-		if(result.response?.ok === true) return result.data.d;
+		if(result.response?.ok === true) return result.data;
 		else throw new Error("Wrong Response");
 	}
 
@@ -23,7 +23,7 @@ export default class Request{
 
 	async ed(){
 		let result = await this.result;
-		if(result.response?.ok === false) return result.data.d;
+		if(result.response?.ok === false) return result.data;
 		else throw new Error("Wrong Response");
 	}
 
@@ -90,18 +90,19 @@ export default class Request{
 			this.#status[resultResponseInterceptor.response.status](resultResponseInterceptor);
 		}
 
-		if(resultResponseInterceptor.data?.i !== undefined && this.constructor.hookInfo[resultResponseInterceptor.data.i] !== undefined){
-			this.constructor.hookInfo[resultResponseInterceptor.data.i](resultResponseInterceptor.data.i, resultResponseInterceptor.response.ok);
+		let info = resultResponseInterceptor.response.headers.get("aob-info") || undefined;
+		if(info !== undefined && this.constructor.hookInfo[info] !== undefined){
+			this.constructor.hookInfo[info](info, resultResponseInterceptor.response.ok);
 		}
-		if(resultResponseInterceptor.data?.i !== undefined){
-			this.#info(resultResponseInterceptor.data.i, resultResponseInterceptor.response.ok);
+		if(info !== undefined){
+			this.#info(info, resultResponseInterceptor.response.ok);
 		}
 
 		if(resultResponseInterceptor.response.ok === true){
-			this.#s(resultResponseInterceptor.data?.d || resultResponseInterceptor.data);
+			this.#s(resultResponseInterceptor.data || resultResponseInterceptor.data);
 		}
 		else if(resultResponseInterceptor.response.ok === false){
-			this.#e(resultResponseInterceptor.data?.d || resultResponseInterceptor.data);
+			this.#e(resultResponseInterceptor.data || resultResponseInterceptor.data);
 		}
 
 		return resultResponseInterceptor;

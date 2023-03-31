@@ -1,4 +1,4 @@
-import Request, { objDataResponse, objRequest, objResponse } from "./request";
+import Request, { objRequest, objResponse } from "./request";
 
 type objInit = {
 	host?: string;
