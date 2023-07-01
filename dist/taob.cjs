@@ -96,12 +96,12 @@ class Request{
 		return this;
 	}
 
-	status(code, fnc){ 
-		this.#status[code] = fnc;
+	code(code, fnc){ 
+		this.#code[code] = fnc;
 		return this;
 	}
 
-	async statusData(code){
+	async cd(code){
 		let result = await this.result;
 		if(result.response?.status === code) return result;
 		else throw new Error("Wrong Response");
@@ -127,7 +127,7 @@ class Request{
 	#s = () => {};
 	#e = () => {};
 	#info = () => {};
-	#status = {};
+	#code = {};
 	#then = () => {};
 	#catch = (err) => {
 		throw err;
@@ -142,7 +142,7 @@ class Request{
 			resultRequestInterceptor.parameters
 		);
 
-		let resultResponseInterceptor = this.constructor.responseInterceptor(response, interceptorParams);
+		let resultResponseInterceptor = this.constructor.responseInterceptor(response, resultRequestInterceptor, interceptorParams);
 
 		if(resultResponseInterceptor.error !== undefined){
 			this.constructor.hookError(resultResponseInterceptor.error);
@@ -150,7 +150,7 @@ class Request{
 				this.#catch(resultResponseInterceptor.error);
 			}
 			finally {
-				this.#finally(resultResponseInterceptor.error);
+				this.#finally();
 			}
 			return;
 		}
@@ -158,18 +158,18 @@ class Request{
 			this.#then(resultResponseInterceptor);
 		}
 
-		if(this.constructor.hookStatus[resultResponseInterceptor.response.status] !== undefined){
-			this.constructor.hookStatus[resultResponseInterceptor.response.status]
-			.forEach(fnc => fnc(resultResponseInterceptor, interceptorParams));
+		if(this.constructor.hookCode[resultResponseInterceptor.response.status] !== undefined){
+			this.constructor.hookCode[resultResponseInterceptor.response.status]
+			.forEach(fnc => fnc(resultResponseInterceptor, resultRequestInterceptor, interceptorParams));
 		}
-		if(this.#status[resultResponseInterceptor.response.status] !== undefined){
-			this.#status[resultResponseInterceptor.response.status](resultResponseInterceptor);
+		if(this.#code[resultResponseInterceptor.response.status] !== undefined){
+			this.#code[resultResponseInterceptor.response.status](resultResponseInterceptor);
 		}
 
-		let info = resultResponseInterceptor.response.headers.get(this.constructor.indexInfo) || undefined;
+		let info = resultResponseInterceptor.info || undefined;
 		if(info !== undefined && this.constructor.hookInfo[info] !== undefined){
 			this.constructor.hookInfo[info]
-			.forEach(fnc => fnc(resultResponseInterceptor, interceptorParams));
+			.forEach(fnc => fnc(resultResponseInterceptor, resultRequestInterceptor, interceptorParams));
 		}
 		if(info !== undefined){
 			this.#info(info, resultResponseInterceptor.response.ok);
@@ -204,6 +204,7 @@ class Request{
 		try {
 			const response = await fetch(path, params);
 			const responseContentType = response.headers.get("content-type");
+			const info = response.headers.get(this.indexInfo) || undefined;
 
 			try {
 				if(responseContentType.indexOf("application/json") !== -1) var data = await response.json();
@@ -214,7 +215,7 @@ class Request{
 				var data = undefined;
 			}
 
-			return {response, data};
+			return {response, data, info};
 		}
 		catch (error){
 			return {error};
@@ -227,17 +228,13 @@ class Request{
 	static requestInterceptor = request => request;
 	static responseInterceptor = response => response;
 	static hookError = () => {};
-	static hookStatus = {};
+	static hookCode = {};
 	static hookInfo = {};
 }
 
 class Toanotherback{
 	constructor(obj = {}){
-
-		this.Requester = class extends Request{
-			static hookStatus = {};
-			static hookInfo = {};
-		};
+		this.Requester = class extends Request{};
 	
 		if(obj.host !== undefined) this.host = obj.host;
 		if(obj.prefix !== undefined) this.prefix = obj.prefix;
@@ -355,17 +352,17 @@ class Toanotherback{
 			}
 		);
 	}
-	addHookStatus(status, fnc){
-		if(this.Requester.hookStatus[status] === undefined) this.Requester.hookStatus[status] = [];
-		this.Requester.hookStatus[status].push(fnc);
+	addHookCode(code, fnc){
+		if(this.Requester.hookCode[code] === undefined) this.Requester.hookCode[code] = [];
+		this.Requester.hookCode[code].push(fnc);
 	}
 	addHookInfo(info, fnc){
 		if(this.Requester.hookInfo[info] === undefined) this.Requester.hookInfo[info] = [];
 		this.Requester.hookInfo[info].push(fnc);
 	}
-	removeHookStatus(status, fnc){
-		if(this.Requester.hookStatus[status] === undefined) this.Requester.hookStatus[status] = [];
-		this.Requester.hookStatus[status] = this.Requester.hookStatus[status].filter(f => f !== fnc);
+	removeHookCode(code, fnc){
+		if(this.Requester.hookCode[code] === undefined) this.Requester.hookCode[code] = [];
+		this.Requester.hookCode[code] = this.Requester.hookCode[code].filter(f => f !== fnc);
 	}
 	removeHookInfo(info, fnc){
 		if(this.Requester.hookInfo[info] === undefined) this.Requester.hookInfo[info] = [];

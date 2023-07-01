@@ -38,12 +38,12 @@ export default class Request{
 		return this;
 	}
 
-	status(code, fnc){ 
-		this.#status[code] = fnc;
+	code(code, fnc){ 
+		this.#code[code] = fnc;
 		return this;
 	}
 
-	async statusData(code){
+	async cd(code){
 		let result = await this.result;
 		if(result.response?.status === code) return result;
 		else throw new Error("Wrong Response");
@@ -69,7 +69,7 @@ export default class Request{
 	#s = () => {};
 	#e = () => {};
 	#info = () => {};
-	#status = {};
+	#code = {};
 	#then = () => {};
 	#catch = (err) => {
 		throw err;
@@ -84,7 +84,7 @@ export default class Request{
 			resultRequestInterceptor.parameters
 		);
 
-		let resultResponseInterceptor = this.constructor.responseInterceptor(response, interceptorParams);
+		let resultResponseInterceptor = this.constructor.responseInterceptor(response, resultRequestInterceptor, interceptorParams);
 
 		if(resultResponseInterceptor.error !== undefined){
 			this.constructor.hookError(resultResponseInterceptor.error);
@@ -92,7 +92,7 @@ export default class Request{
 				this.#catch(resultResponseInterceptor.error);
 			}
 			finally {
-				this.#finally(resultResponseInterceptor.error);
+				this.#finally();
 			}
 			return;
 		}
@@ -100,18 +100,18 @@ export default class Request{
 			this.#then(resultResponseInterceptor);
 		}
 
-		if(this.constructor.hookStatus[resultResponseInterceptor.response.status] !== undefined){
-			this.constructor.hookStatus[resultResponseInterceptor.response.status]
-			.forEach(fnc => fnc(resultResponseInterceptor, interceptorParams));
+		if(this.constructor.hookCode[resultResponseInterceptor.response.status] !== undefined){
+			this.constructor.hookCode[resultResponseInterceptor.response.status]
+			.forEach(fnc => fnc(resultResponseInterceptor, resultRequestInterceptor, interceptorParams));
 		}
-		if(this.#status[resultResponseInterceptor.response.status] !== undefined){
-			this.#status[resultResponseInterceptor.response.status](resultResponseInterceptor);
+		if(this.#code[resultResponseInterceptor.response.status] !== undefined){
+			this.#code[resultResponseInterceptor.response.status](resultResponseInterceptor);
 		}
 
-		let info = resultResponseInterceptor.response.headers.get(this.constructor.indexInfo) || undefined;
+		let info = resultResponseInterceptor.info || undefined;
 		if(info !== undefined && this.constructor.hookInfo[info] !== undefined){
 			this.constructor.hookInfo[info]
-			.forEach(fnc => fnc(resultResponseInterceptor, interceptorParams));
+			.forEach(fnc => fnc(resultResponseInterceptor, resultRequestInterceptor, interceptorParams));
 		}
 		if(info !== undefined){
 			this.#info(info, resultResponseInterceptor.response.ok);
@@ -146,6 +146,7 @@ export default class Request{
 		try {
 			const response = await fetch(path, params);
 			const responseContentType = response.headers.get("content-type");
+			const info = response.headers.get(this.indexInfo) || undefined;
 
 			try {
 				if(responseContentType.indexOf("application/json") !== -1) var data = await response.json();
@@ -156,7 +157,7 @@ export default class Request{
 				var data = undefined;
 			}
 
-			return {response, data};
+			return {response, data, info};
 		}
 		catch (error){
 			return {error};
@@ -169,6 +170,6 @@ export default class Request{
 	static requestInterceptor = request => request;
 	static responseInterceptor = response => response;
 	static hookError = () => {};
-	static hookStatus = {};
+	static hookCode = {};
 	static hookInfo = {};
 }

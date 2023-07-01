@@ -9,6 +9,7 @@ export type objResponse = {
 	response?: Response;
 	data?: any;
 	error?: Error;
+	info?: string;
 }
 
 export default class Request{
@@ -24,9 +25,9 @@ export default class Request{
 
     info(fnc: (info: string, status: boolean) => void): this;
 
-	status(code: number, fnc: (data: objResponse) => void): this;
+	code(code: number, fnc: (data: objResponse) => void): this;
 
-	statusData(code: number): Promise<objResponse>;
+	cd(code: number): Promise<objResponse>;
 
     then(fnc: (rep: objResponse) => void): this;
     
