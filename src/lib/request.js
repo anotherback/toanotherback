@@ -79,7 +79,7 @@ export default class Request{
 	async #result(path, parameters, interceptorParams){
 		let resultRequestInterceptor = this.constructor.requestInterceptor({path, parameters}, interceptorParams);
 
-		let response = await Request.fetch(
+		let response = await this.fetch(
 			this.constructor.href + resultRequestInterceptor.path,
 			resultRequestInterceptor.parameters
 		);
@@ -108,7 +108,7 @@ export default class Request{
 			this.#code[resultResponseInterceptor.response.status](resultResponseInterceptor);
 		}
 
-		let info = resultResponseInterceptor.info || undefined;
+		let info = resultResponseInterceptor.info;
 		if(info !== undefined && this.constructor.hookInfo[info] !== undefined){
 			this.constructor.hookInfo[info]
 			.forEach(fnc => fnc(resultResponseInterceptor, resultRequestInterceptor, interceptorParams));
@@ -128,7 +128,7 @@ export default class Request{
 		return resultResponseInterceptor;
 	}
 
-	static async fetch(path, params){
+	async fetch(path, params){
 		if(params.params !== undefined){
 			let paths = path.split("?");
 			Object.entries(params.params).forEach(([key, value]) => paths[0] = paths[0].replace(`{${key}}`, value));
@@ -146,7 +146,7 @@ export default class Request{
 		try {
 			const response = await fetch(path, params);
 			const responseContentType = response.headers.get("content-type");
-			const info = response.headers.get(this.indexInfo) || undefined;
+			const info = response.headers.get(this.constructor.indexInfo) || undefined;
 
 			try {
 				if(responseContentType.indexOf("application/json") !== -1) var data = await response.json();
