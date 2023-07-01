@@ -22,8 +22,8 @@
 				hookError: (error) => console.error(error)
 			});
 
-			taob.addHookInfo("NOT_FOUND", console.log);
-			taob.addHookStatus(404, console.log);
+			// taob.addHookInfo("NOT_FOUND", console.log);
+			// taob.addHookStatus(404, console.log);
 
 			let result = await taob.get("user", {params: {"test": 1}, query: {}})
 			.s(data => console.log(data))
