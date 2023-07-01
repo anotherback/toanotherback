@@ -11,9 +11,8 @@
 	<script>
 		(async () => {
 			const taob = new Toanotherback({
-				prefix: "test",
-				host: "192.168.1.1:1506",
 				https: false,
+				indexInfo: "info",
 				parameters: {
 					credentials: "include"
 				},
@@ -21,9 +20,12 @@
 				requestInterceptor: (request) => request,
 				responseInterceptor: (response) => response,
 				hookError: (error) => console.error(error)
-			})
+			});
 
-			let result = await taob.get("")
+			taob.addHookInfo("NOT_FOUND", console.log);
+			taob.addHookStatus(404, console.log);
+
+			let result = await taob.get("user", {params: {"test": 1}, query: {}})
 			.s(data => console.log(data))
 			.status(200, data => console.log(data))
 			.info((info, status) => console.log(info, status))

@@ -1,3 +1,5 @@
+import { RequestInitTaob } from "./toanotherback";
+
 export type objRequest = {
 	path: string;
 	parameters: RequestInit;
@@ -10,7 +12,7 @@ export type objResponse = {
 }
 
 export default class Request{
-    constructor(path: string, params: RequestInit);
+    constructor(path: string, params: RequestInitTaob, interceptorParams: {[key: string]: string});
 
     s(fnc: (data: any) => void): this;
 
@@ -29,6 +31,8 @@ export default class Request{
     then(fnc: (rep: objResponse) => void): this;
     
     catch(fnc: (rep: objResponse) => void): this;
+
+	finally(fnc: () => void): this;
 
     result: Promise<objResponse>;
 }

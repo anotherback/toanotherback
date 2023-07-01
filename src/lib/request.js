@@ -1,8 +1,8 @@
 import pathCorrector from "./pathCorrector.js";
 
 export default class Request{
-	constructor(path, params){
-		this.result = this.#result(pathCorrector(path), params);
+	constructor(path, params, interceptorParams){
+		this.result = this.#result(pathCorrector(path), params, interceptorParams);
 	}
 
 	s(fnc){
@@ -53,6 +53,11 @@ export default class Request{
 		return this;
 	}
 
+	finally(fnc){
+		this.#finally = fnc;
+		return this;
+	}
+
 	result;
 
 	#s = () => {};
@@ -63,20 +68,26 @@ export default class Request{
 	#catch = (err) => {
 		throw err;
 	};
+	#finally = () => {};
 
-	async #result(path, parameters){
-		let resultRequestInterceptor = this.constructor.requestInterceptor({path, parameters});
+	async #result(path, parameters, interceptorParams){
+		let resultRequestInterceptor = this.constructor.requestInterceptor({path, parameters}, interceptorParams);
 
 		let response = await Request.fetch(
 			this.constructor.href + resultRequestInterceptor.path,
 			resultRequestInterceptor.parameters
 		);
 
-		let resultResponseInterceptor = this.constructor.responseInterceptor(response);
+		let resultResponseInterceptor = this.constructor.responseInterceptor(response, interceptorParams);
 
 		if(resultResponseInterceptor.error !== undefined){
 			this.constructor.hookError(resultResponseInterceptor.error);
-			this.#catch(resultResponseInterceptor.error);
+			try {
+				this.#catch(resultResponseInterceptor.error);
+			}
+			finally {
+				this.#finally(resultResponseInterceptor.error);
+			}
 			return;
 		}
 		else {
@@ -84,31 +95,48 @@ export default class Request{
 		}
 
 		if(this.constructor.hookStatus[resultResponseInterceptor.response.status] !== undefined){
-			this.constructor.hookStatus[resultResponseInterceptor.response.status](resultResponseInterceptor);
+			this.constructor.hookStatus[resultResponseInterceptor.response.status]
+			.forEach(fnc => fnc(resultResponseInterceptor, interceptorParams));
 		}
 		if(this.#status[resultResponseInterceptor.response.status] !== undefined){
 			this.#status[resultResponseInterceptor.response.status](resultResponseInterceptor);
 		}
 
-		let info = resultResponseInterceptor.response.headers.get("aob-info") || undefined;
+		let info = resultResponseInterceptor.response.headers.get(this.constructor.indexInfo) || undefined;
 		if(info !== undefined && this.constructor.hookInfo[info] !== undefined){
-			this.constructor.hookInfo[info](info, resultResponseInterceptor.response.ok);
+			this.constructor.hookInfo[info]
+			.forEach(fnc => fnc(resultResponseInterceptor, interceptorParams));
 		}
 		if(info !== undefined){
 			this.#info(info, resultResponseInterceptor.response.ok);
 		}
 
 		if(resultResponseInterceptor.response.ok === true){
-			this.#s(resultResponseInterceptor.data || resultResponseInterceptor.data);
+			this.#s(resultResponseInterceptor.data);
 		}
 		else if(resultResponseInterceptor.response.ok === false){
-			this.#e(resultResponseInterceptor.data || resultResponseInterceptor.data);
+			this.#e(resultResponseInterceptor.data);
 		}
 
+		this.#finally();
 		return resultResponseInterceptor;
 	}
 
 	static async fetch(path, params){
+		if(params.params !== undefined){
+			let paths = path.split("?");
+			Object.entries(params.params).forEach(([key, value]) => paths[0] = paths[0].replace(`{${key}}`, value));
+			delete params.params;
+			path = paths.join("?");
+		}
+		if(params.query !== undefined){
+			let paths = path.split("?");
+			let query = [];
+			Object.entries(params.query).forEach(([key, value]) => query.push(`${key}=${value}`));
+			delete params.query;
+			path = paths[0] + "?" + query.join("&") + (paths[1] ? "&" + paths[1] : "");
+		}
+
 		try {
 			const response = await fetch(path, params);
 			const responseContentType = response.headers.get("content-type");
@@ -129,6 +157,7 @@ export default class Request{
 		}
 	}
 
+	static indexInfo = "aob-info";
 	static href = "";
 	static requestInterceptor = request => request;
 	static responseInterceptor = response => response;
