@@ -13,8 +13,9 @@ type objInit = {
 }
 
 export type RequestInitTaob = {
-	params: {[key: string]: string},
-	query: {[key: string]: string}
+	params: {[key: string]: string};
+	query: {[key: string]: string};
+	disabledPrefix: boolean;
 } & RequestInit;
 
 export default class Toanotherback{

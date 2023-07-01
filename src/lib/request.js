@@ -2,7 +2,12 @@ import pathCorrector from "./pathCorrector.js";
 
 export default class Request{
 	constructor(path, params, interceptorParams){
-		this.result = this.#result(pathCorrector(path), params, interceptorParams);
+		if(params.disabledPrefix === true){
+			path = pathCorrector(path);
+			delete params.disabledPrefix;
+		}
+		else path = pathCorrector(this.constructor.prefix, path);
+		this.result = this.#result(path, params, interceptorParams);
 	}
 
 	s(fnc){
@@ -157,6 +162,7 @@ export default class Request{
 		}
 	}
 
+	static prefix = "";
 	static indexInfo = "aob-info";
 	static href = "";
 	static requestInterceptor = request => request;
