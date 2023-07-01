@@ -3,19 +3,18 @@ import pathCorrector from "./pathCorrector.js";
 
 export default class Toanotherback{
 	constructor(obj = {}){
+
+		this.Requester = class extends Request{
+			static hookStatus = {};
+			static hookInfo = {};
+		};
+	
 		if(obj.host !== undefined) this.host = obj.host;
 		if(obj.prefix !== undefined) this.prefix = obj.prefix;
 		if(obj.https !== undefined) this.https = obj.https;
 		if(obj.parameters !== undefined) this.parameters = obj.parameters;
 		if(obj.indexInfo !== undefined) this.indexInfo = obj.indexInfo;
 		
-		this.Requester = class extends Request{
-			static hookStatus = {};
-			static hookInfo = {};
-		};
-	
-		this.#setHerf();
-		this.#setIndexInfo();
 		if(obj.requestInterceptor !== undefined) this.setRequestInterceptor(obj.requestInterceptor);
 		if(obj.responseInterceptor !== undefined) this.setResponseInterceptor(obj.responseInterceptor);
 		if(obj.hookError !== undefined) this.setHookError(obj.hookError);
@@ -35,8 +34,15 @@ export default class Toanotherback{
 		return this.#prefix;
 	}
 	set prefix(arg){
-		this.#prefix = pathCorrector(arg);
-		this.#setHerf();
+		this.#prefix = arg;
+		Object.defineProperty(
+			this.Requester,
+			"prefix",
+			{
+				value: this.#prefix,
+				configurable: true,
+			}
+		);
 	}
 
 	#protocol = window.location.protocol.slice(0, -1);
@@ -55,7 +61,14 @@ export default class Toanotherback{
 	}
 	set indexInfo(arg){
 		this.#indexInfo = arg;
-		this.#setIndexInfo;
+		Object.defineProperty(
+			this.Requester,
+			"indexInfo",
+			{
+				value: this.#indexInfo,
+				configurable: true,
+			}
+		);
 	}
 
 	parameters = {};
@@ -77,7 +90,7 @@ export default class Toanotherback{
 			this.Requester,
 			"href",
 			{
-				value: this.#protocol + "://" + this.host + this.prefix,
+				value: this.#protocol + "://" + this.host,
 				configurable: true,
 			}
 		);
