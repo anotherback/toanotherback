@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-	"dev": "webpack serve",
-	"build": "webpack"
+    "dev": "webpack serve",
+    "build": "webpack"
   },
   "type": "module",
   "keywords": [],
@@ -14,8 +14,12 @@
   "types": "./types/index.d.ts",
   "devDependencies": {
     "eslint": "^8.33.0",
-	"webpack": "^5.75.0",
+    "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1"
+  },
+  "dependencies": {
+    "@rollup/plugin-terser": "^0.4.3",
+    "rollup": "^3.26.0"
   }
 }

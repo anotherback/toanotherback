@@ -7,6 +7,7 @@ export default class Toanotherback{
 		if(obj.prefix !== undefined) this.prefix = obj.prefix;
 		if(obj.https !== undefined) this.https = obj.https;
 		if(obj.parameters !== undefined) this.parameters = obj.parameters;
+		if(obj.indexInfo !== undefined) this.indexInfo = obj.indexInfo;
 		
 		this.Requester = class extends Request{
 			static hookStatus = {};
@@ -14,6 +15,7 @@ export default class Toanotherback{
 		};
 	
 		this.#setHerf();
+		this.#setIndexInfo();
 		if(obj.requestInterceptor !== undefined) this.setRequestInterceptor(obj.requestInterceptor);
 		if(obj.responseInterceptor !== undefined) this.setResponseInterceptor(obj.responseInterceptor);
 		if(obj.hookError !== undefined) this.setHookError(obj.hookError);
@@ -47,10 +49,29 @@ export default class Toanotherback{
 		this.#setHerf();
 	}
 
+	#indexInfo = "aob-info";
+	get indexInfo(){
+		return this.#indexInfo;
+	}
+	set indexInfo(arg){
+		this.#indexInfo = arg;
+		this.#setIndexInfo;
+	}
+
 	parameters = {};
 
 	Requester = {};
 
+	#setIndexInfo(){
+		Object.defineProperty(
+			this.Requester,
+			"indexInfo",
+			{
+				value: this.#indexInfo,
+				configurable: true,
+			}
+		);
+	}
 	#setHerf(){
 		Object.defineProperty(
 			this.Requester,
@@ -91,118 +112,165 @@ export default class Toanotherback{
 			}
 		);
 	}
-	setHookStatus(status, fnc){
-		this.Requester.hookStatus[status] = fnc;
+	addHookStatus(status, fnc){
+		if(this.Requester.hookStatus[status] === undefined) this.Requester.hookStatus[status] = [];
+		this.Requester.hookStatus[status].push(fnc);
 	}
-	setHookInfo(info, fnc){
-		this.Requester.hookInfo[info] = fnc;
+	addHookInfo(info, fnc){
+		if(this.Requester.hookInfo[info] === undefined) this.Requester.hookInfo[info] = [];
+		this.Requester.hookInfo[info].push(fnc);
 	}
-
-	send(path, parameters = {}){
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-		});
+	removeHookStatus(status, fnc){
+		if(this.Requester.hookStatus[status] === undefined) this.Requester.hookStatus[status] = [];
+		this.Requester.hookStatus[status] = this.Requester.hookStatus[status].filter(f => f !== fnc);
 	}
-
-	get(path, parameters = {}){
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-			method: "GET",
-		});
+	removeHookInfo(info, fnc){
+		if(this.Requester.hookInfo[info] === undefined) this.Requester.hookInfo[info] = [];
+		this.Requester.hookInfo[info] = this.Requester.hookInfo[info].filter(f => f !== fnc);
 	}
 
-	head(path, parameters = {}){
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-			method: "HEAD"
-		});
-	}
-
-	options(path, parameters = {}){
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-			method: "OPTIONS",
-		});
-	}
-
-	delete(path, parameters = {}){
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-			method: "DELETE",
-		});
-	}
-
-	post(path, body = {}, parameters = {}){
-		let result = this.autoContentType(body);
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-			headers: {
-				...this.parameters.headers || {},
-				["Content-Type"]: result["Content-Type"],
-				...parameters.headers || {}
+	send(path, parameters = {}, interceptorParams = {}){
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
 			},
-			method: "POST",
-			body: result.body
-		});
+			interceptorParams
+		);
 	}
 
-	put(path, body = {}, parameters = {}){
-		let result = this.autoContentType(body);
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-			headers: {
-				...this.parameters.headers || {},
-				["Content-Type"]: result["Content-Type"],
-				...parameters.headers || {}
+	get(path, parameters = {}, interceptorParams = {}){
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
+				method: "GET",
 			},
-			method: "PUT",
-			body: result.body
-		});
+			interceptorParams
+		);
 	}
 
-	patch(path, body = {}, parameters = {}){
-		let result = this.autoContentType(body);
-		return new this.Requester(path, {
-			...this.parameters,
-			...parameters,
-			headers: {
-				...this.parameters.headers || {},
-				["Content-Type"]: result["Content-Type"],
-				...parameters.headers || {}
+	head(path, parameters = {}, interceptorParams = {}){
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
+				method: "HEAD"
 			},
-			method: "PATCH",
-			body: result.body
-		});
+			interceptorParams
+		);
+	}
+
+	options(path, parameters = {}, interceptorParams = {}){
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
+				method: "OPTIONS",
+			},
+			interceptorParams
+		);
+	}
+
+	delete(path, parameters = {}, interceptorParams = {}){
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
+				method: "DELETE",
+			}, 
+			interceptorParams
+		);
+	}
+
+	post(path, body = {}, parameters = {}, interceptorParams = {}){
+		let result = this.autoContentType(body);
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
+				headers: {
+					...this.parameters.headers || {},
+					...result.headers,
+					...parameters.headers || {}
+				},
+				method: "POST",
+				body: result.body
+			},
+			interceptorParams
+		);
+	}
+
+	put(path, body = {}, parameters = {}, interceptorParams = {}){
+		let result = this.autoContentType(body);
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
+				headers: {
+					...this.parameters.headers || {},
+					...result.headers,
+					...parameters.headers || {}
+				},
+				method: "PUT",
+				body: result.body
+			},
+			interceptorParams
+		);
+	}
+
+	patch(path, body = {}, parameters = {}, interceptorParams = {}){
+		let result = this.autoContentType(body);
+		return new this.Requester(
+			path, 
+			{
+				...this.parameters,
+				...parameters,
+				headers: {
+					...this.parameters.headers || {},
+					...result.headers,
+					...parameters.headers || {}
+				},
+				method: "PATCH",
+				body: result.body
+			},
+			interceptorParams
+		);
 	}
 
 	autoContentType(body){
 		if(body instanceof FormData){
 			return {
-				["Content-Type"]: "multipart/form-data",
+				headers: {},
 				body: body
 			};
 		}
 		else if(body instanceof Object){
 			return {
-				["Content-Type"]: "application/json; charset=utf-8",
+				headers: {
+					"Content-Type": "application/json; charset=utf-8",
+				},
 				body: JSON.stringify(body)
 			};
 		}
-		else if(body instanceof Object){
+		else if(typeof body === "string"){
 			return {
-				["Content-Type"]: "text/html; charset=utf-8",
+				headers: {
+					"Content-Type": "text/html; charset=utf-8",
+				},
 				body: body
 			};
 		}
 		else {
 			return {
+				headers: {},
 				body: body
 			};
 		}
