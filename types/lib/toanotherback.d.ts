@@ -8,7 +8,7 @@ type objInit = {
 	indexInfo?: string;
 
 	requestInterceptor?: (request: objRequest, interceptorParams: {[key: string]: string}) => objRequest;
-	responseInterceptor?: (response: objResponse, interceptorParams: {[key: string]: string}) => objResponse;
+	responseInterceptor?: (response: objResponse, request: objRequest, interceptorParams: {[key: string]: string}) => objResponse;
 	hookError?: (error: Error) => void;
 }
 
@@ -28,12 +28,12 @@ export default class Toanotherback{
 	indexInfo: string;
 
 	setRequestInterceptor(fnc: (request: objRequest, interceptorParams: {[key: string]: string}) => objRequest): void;
-	setResponseInterceptor(fnc: (response: objResponse, interceptorParams: {[key: string]: string}) => objResponse): void;
+	setResponseInterceptor(fnc: (response: objResponse, request: objRequest, interceptorParams: {[key: string]: string}) => objResponse): void;
 	setHookError(fnc: (error: Error) => void): void;
 
-	addHookStatus(code: number, fnc: (response: objResponse, interceptorParams: {[key: string]: string}) => void): void;
-	addHookInfo(info: string, fnc: (response: objResponse, interceptorParams: {[key: string]: string}) => void): void;
-	removeHookStatus(code: number, fnc: Function): void;
+	addHookCode(code: number, fnc: (response: objResponse, request: objRequest, interceptorParams: {[key: string]: string}) => void): void;
+	addHookInfo(info: string, fnc: (response: objResponse, request: objRequest, interceptorParams: {[key: string]: string}) => void): void;
+	removeHookCode(code: number, fnc: Function): void;
 	removeHookInfo(info: string, fnc: Function): void;
 
 	send(path: string, parameters: RequestInitTaob, interceptorParams: {[key: string]: string}): Request;
