@@ -3,6 +3,7 @@ import pathCorrector from "./pathCorrector.js";
 
 export default class Toanotherback{
 	constructor(obj = {}){
+
 		this.Requester = class extends Request{
 			static hookStatus = {};
 			static hookInfo = {};
@@ -74,6 +75,16 @@ export default class Toanotherback{
 
 	Requester = {};
 
+	#setIndexInfo(){
+		Object.defineProperty(
+			this.Requester,
+			"indexInfo",
+			{
+				value: this.#indexInfo,
+				configurable: true,
+			}
+		);
+	}
 	#setHerf(){
 		Object.defineProperty(
 			this.Requester,

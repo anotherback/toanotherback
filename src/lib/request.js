@@ -8,6 +8,7 @@ export default class Request{
 		}
 		else path = pathCorrector(this.constructor.prefix, path);
 		this.result = this.#result(path, params, interceptorParams);
+
 	}
 
 	s(fnc){
