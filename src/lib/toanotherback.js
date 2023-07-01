@@ -3,11 +3,7 @@ import pathCorrector from "./pathCorrector.js";
 
 export default class Toanotherback{
 	constructor(obj = {}){
-
-		this.Requester = class extends Request{
-			static hookStatus = {};
-			static hookInfo = {};
-		};
+		this.Requester = class extends Request{};
 	
 		if(obj.host !== undefined) this.host = obj.host;
 		if(obj.prefix !== undefined) this.prefix = obj.prefix;
@@ -125,17 +121,17 @@ export default class Toanotherback{
 			}
 		);
 	}
-	addHookStatus(status, fnc){
-		if(this.Requester.hookStatus[status] === undefined) this.Requester.hookStatus[status] = [];
-		this.Requester.hookStatus[status].push(fnc);
+	addHookCode(code, fnc){
+		if(this.Requester.hookCode[code] === undefined) this.Requester.hookCode[code] = [];
+		this.Requester.hookCode[code].push(fnc);
 	}
 	addHookInfo(info, fnc){
 		if(this.Requester.hookInfo[info] === undefined) this.Requester.hookInfo[info] = [];
 		this.Requester.hookInfo[info].push(fnc);
 	}
-	removeHookStatus(status, fnc){
-		if(this.Requester.hookStatus[status] === undefined) this.Requester.hookStatus[status] = [];
-		this.Requester.hookStatus[status] = this.Requester.hookStatus[status].filter(f => f !== fnc);
+	removeHookCode(code, fnc){
+		if(this.Requester.hookCode[code] === undefined) this.Requester.hookCode[code] = [];
+		this.Requester.hookCode[code] = this.Requester.hookCode[code].filter(f => f !== fnc);
 	}
 	removeHookInfo(info, fnc){
 		if(this.Requester.hookInfo[info] === undefined) this.Requester.hookInfo[info] = [];
