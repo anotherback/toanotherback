@@ -17,5 +17,5 @@ export default function pathCorrector(...paths){
 	path = path.replace(/_/g, "");
 	path = path.replace(/ /g, "");
 
-	return (path === "/" ? "" : path) + (query !== undefined ? "?" + query : "");
+	return (path === "/" ? "/" : path) + (query !== undefined ? "?" + query : "");
 }
