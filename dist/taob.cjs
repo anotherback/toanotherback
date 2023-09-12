@@ -196,7 +196,7 @@ class Request{
 		if(params.query !== undefined){
 			let paths = path.split("?");
 			let query = [];
-			Object.entries(params.query).forEach(([key, value]) => query.push(`${key}=${value}`));
+			Object.entries(params.query).forEach(([key, value]) => value !== undefined ? query.push(`${key}=${value}`) : undefined);
 			delete params.query;
 			path = paths[0] + "?" + query.join("&") + (paths[1] ? "&" + paths[1] : "");
 		}
